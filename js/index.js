@@ -30,6 +30,13 @@ var app = {
     cachePartyCreatorPhone:0,
     partyCreatorPhone:0,
 
+
+    cacheTargetX:0.0,
+    cacheTargetY:0.0,
+
+    targetX:0.0,
+    targetY:0.0,
+
     cachePartyId: 0,
 
     // 聚会中每个人的颜色
@@ -378,6 +385,9 @@ var app = {
                 console.log('yacheng save party success');
                 alert('save ok');
                 self.partyId = d.data.partyId;
+
+                self.cacheTargetX = d.data.latitude;
+                self.cacheTargetY = d.data.longitude;
             },
             error:function(data){
             }
@@ -435,6 +445,11 @@ var app = {
                     if(d.data.partyId){
                         self.partyId = d.data.partyId;
                     }
+                    if(d.data.latitude && d.data.longitude) {
+                        self.setMapOverLay(new BMap.Point(d.data.latitude,d.data.longitude), 30, '#000','');
+                    }
+
+
                     if(d.data.msgList && d.data.msgList.length){
                         self.setMsgList(d.data.msgList);
                     }
@@ -444,6 +459,13 @@ var app = {
                     if(d.data.inviteMsg && d.data.inviteMsg.partyId){
                         self.cachePartyId = d.data.inviteMsg.partyId;
                         self.cachePartyCreatorPhone = d.data.partyCreatorPhone;
+
+                        self.targetX = self.cacheTargetX;
+                        self.targetY = self.cacheTargetY;
+
+
+                        self.setMapOverLay(new BMap.Point(self.targetX, self.targetY), 30, '','img/position icon.png');
+
                         //alert('系统消息');
                         $('.J_Alert').show();
                         $('.J_A_Nick').html(d.data.inviteMsg.creator);
@@ -559,7 +581,7 @@ var app = {
 
     }, 
     // 自定义地图覆盖物
-    setMapOverLay: function(center, length, color){
+    setMapOverLay: function(center, length, color,imgSrc){
         if(!color){
             color = '';
         }
@@ -578,10 +600,14 @@ var app = {
             div.style.width = this._length + "px";  
             div.style.height = this._length + "px";  
             div.style.background = this._color;
-            $(div).addClass('map-color-point');
-            $(div).html('<span></span>');
-            map.getPanes().markerPane.appendChild(div);    
-            // 保存div实例  
+            if(imgSrc) {
+                $(div).html('<img src="'+imgSrc+'"/>');
+            } else {
+                $(div).addClass('map-color-point');
+                $(div).html('<span></span>');
+            }
+            map.getPanes().markerPane.appendChild(div);
+            // 保存div实例
             this._div = div;    
             return div;  
         }
